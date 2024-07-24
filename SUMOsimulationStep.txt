@@ -1,0 +1,8 @@
+python randomTrips.py -n xxx.net.xml -r xxxx.rou.xml -e 1000 -p 10 --random
+
+-b begin time
+-e end time
+-p 频率
+--random 加上的话trips每次都不一样
+
+sumo  --tripinfo-output  xxxx.xml   -c  <config_file_name.sumo.cfg>    
