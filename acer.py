@@ -227,7 +227,21 @@ def off_policy_update(batch_size, replay_ratio=4):
         retrace = retrace.detach()
         compute_acer_loss(policies, q_values, values, action, reward, retrace, mask, old_policy)
         
-        
+def transform_return_to_go(rewards):
+    """
+    Transforms a list of rewards into a list of return-to-go rewards.
+
+    Args:
+        rewards (list): A list of rewards.
+
+    Returns:
+        list: A list of return-to-go rewards, where each element is the sum of rewards[i:].
+
+    """
+    RTGreward = []
+    for i in range(len(rewards)):
+        RTGreward.append(sum(rewards[i:]))
+    return RTGreward
 
 
         
