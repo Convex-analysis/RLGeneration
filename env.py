@@ -337,7 +337,6 @@ class Environment():
         for i in range(1, AVAILABLE_BANDWIDTH+1):
             self.resourcepool[str(i)] = [[0, ONE_ROUND_TIME]]
         return self.get_state()
-<<<<<<< HEAD
     
     def get_state(self):
         current_state = []
@@ -378,11 +377,6 @@ class Environment():
         
     def get_state_old(self):
         current_state = []
-=======
-        
-    def get_state(self):
-        current_state = []
->>>>>>> 366109950b4bd22652aa8b4257d35660ef0e4034
         #get the current vehicle atricbutes
         if len(self.vehicle_queue) == 0:
             vehicle = Vehicle(0, 0, 0, 0, 0, 0, 0)
@@ -424,11 +418,7 @@ class Environment():
         duration = selected_resource_block[1] - selected_resource_block[0]
         scheduled_vehicle_count = len(self.scheduled_vehicle)
         improved_resource_utilization = duration/(ONE_ROUND_TIME*AVAILABLE_BANDWIDTH)
-<<<<<<< HEAD
         reward = 1 + improved_resource_utilization
-=======
-        reward = improved_resource_utilization + scheduled_vehicle_count/len(self.vehicle_list) 
->>>>>>> 366109950b4bd22652aa8b4257d35660ef0e4034
         return reward   
     
     def resource_block_encoder(self, resource_block, bandwith_index):
@@ -440,9 +430,5 @@ class Environment():
         bandwith_index = int(coded_resource_block/100000000)
         temp = coded_resource_block%100000000
         start_time = int(temp%1000000)
-<<<<<<< HEAD
         end_time = round(temp/10000)
-=======
-        end_time = round(temp/1000)
->>>>>>> 366109950b4bd22652aa8b4257d35660ef0e4034
         return [start_time, end_time, bandwith_index]

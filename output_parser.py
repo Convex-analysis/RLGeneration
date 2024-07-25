@@ -10,13 +10,9 @@ trips = collection.getElementsByTagName("tripinfo")
 nparray = np.array([["id", "depart", "duration", "arrival","train", "communication", "alpha"]])
 #given the required epoch number
 epochs = 10
-<<<<<<< HEAD
 #set the random seed
 np.random.seed(0)
 #iterate through all the nodes in the xml file
-=======
-
->>>>>>> 366109950b4bd22652aa8b4257d35660ef0e4034
 for node in trips:
     #get the values of the attributes
     v_id = node.getAttribute("id")
@@ -26,24 +22,14 @@ for node in trips:
     
     #transform the string to float
     duration = float(duration)
-<<<<<<< HEAD
     #print("duration: ", duration)
-=======
-    print("duration: ", duration)
->>>>>>> 366109950b4bd22652aa8b4257d35660ef0e4034
     #let the sum of communication time and computation time be randomly generated from 0.5 to 1.5 times run_time
     total_time =  np.random.randint(duration *0.5, duration *1.5)
 
     #the ratio of communication time to computation time is randomly generated from 0.5 to 0.9
-<<<<<<< HEAD
     #ratio = np.random.uniform(0.6, 0.9)
     communication_time = np.random.normal(20, 5)
     train_time = np.random.normal(120, 20)
-=======
-    ratio = np.random.uniform(0.6, 0.9)
-    communication_time = total_time * ratio
-    train_time = total_time - communication_time
->>>>>>> 366109950b4bd22652aa8b4257d35660ef0e4034
     #generate the least epoch number accoding to the given epochs and a guassian distribution
     least_epoch = np.random.normal(epochs*0.5, 3)
     if least_epoch <= 1:

@@ -106,7 +106,6 @@ class ActorCritic64(nn.Module):
     
     
 class ActorCritic256(nn.Module):
-<<<<<<< HEAD
     """
     A class representing an Actor-Critic network with a hidden size of 256.
 
@@ -115,8 +114,6 @@ class ActorCritic256(nn.Module):
         num_actions (int): The number of possible actions.
         hidden_size (int, optional): The size of the hidden layer. Defaults to 256.
     """
-=======
->>>>>>> 366109950b4bd22652aa8b4257d35660ef0e4034
     def __init__(self, num_inputs, num_actions, hidden_size=256):
         super(ActorCritic256, self).__init__()
         
@@ -135,7 +132,6 @@ class ActorCritic256(nn.Module):
         
         
     def forward(self, x):
-<<<<<<< HEAD
         """
         Forward pass of the Actor-Critic network.
 
@@ -173,8 +169,6 @@ class ActorCriticTest(nn.Module):
         )
         
     def forward(self, x):
-=======
->>>>>>> 366109950b4bd22652aa8b4257d35660ef0e4034
         policy  = self.actor(x).clamp(max=1-1e-20)
         q_value = self.critic(x)
         value   = (policy * q_value).sum(-1, keepdim=True)
@@ -244,11 +238,7 @@ gamma = 0.99                # discount factor
 lr_actor = 0.0003       # learning rate for actor network
 lr_critic = 0.001       # learning rate for critic network
 random_seed = 0       # set random seed
-<<<<<<< HEAD
 max_training_timesteps = 2000*len(vehicle_list)   # break from training loop if timeteps > max_training_timesteps
-=======
-max_training_timesteps = 500000   # break from training loop if timeteps > max_training_timesteps
->>>>>>> 366109950b4bd22652aa8b4257d35660ef0e4034
 print_freq = max_ep_len * 4     # print avg reward in the interval (in num timesteps)
 log_freq = max_ep_len * 2       # saving avg reward in the interval (in num timesteps)
 save_model_freq = max_ep_len * 4         # save model frequency (in num timesteps)
@@ -259,11 +249,7 @@ max_episode_length = 200
 
 env=Environment(vehicle_list)
 
-<<<<<<< HEAD
 PREDIFINED_RESOURCE_BLOCK = 20
-=======
-PREDIFINED_RESOURCE_BLOCK = 50
->>>>>>> 366109950b4bd22652aa8b4257d35660ef0e4034
 
 # state space dimension, the extendral 3 dimensions here denotes depart time, arrival time and communication time
 state_dim = PREDIFINED_RESOURCE_BLOCK + 3
