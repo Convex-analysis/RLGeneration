@@ -395,6 +395,8 @@ while time_step <= max_training_timesteps:
     actions  = []
     rewards  = []
     masks    = []
+    
+    RTGreward = []
 
     for t in range(1, len(env.get_vehicle_list())+1):
         # select action with policy
@@ -465,7 +467,7 @@ while time_step <= max_training_timesteps:
         # break; if the episode is over
         if done:
             break
-
+    RTGreward = transform_return_to_go(rewards)
     next_state = torch.FloatTensor(state).unsqueeze(0).to(device)
     _, _, retrace = model(next_state)
     retrace = retrace.detach()
