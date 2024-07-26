@@ -2,7 +2,7 @@ from xml.dom.minidom import parse
 import xml.dom.minidom
 import pandas as pd
 import numpy as np
-
+import math
 Domtree = xml.dom.minidom.parse("output_file.xml")
 collection = Domtree.documentElement
 trips = collection.getElementsByTagName("tripinfo")
@@ -28,10 +28,10 @@ for node in trips:
 
     #the ratio of communication time to computation time is randomly generated from 0.5 to 0.9
     #ratio = np.random.uniform(0.6, 0.9)
-    communication_time = np.random.normal(20, 5)
-    train_time = np.random.normal(120, 20)
+    communication_time = np.random.normal(30, 5)
+    train_time = np.random.normal(180, 20)
     #generate the least epoch number accoding to the given epochs and a guassian distribution
-    least_epoch = np.random.normal(epochs*0.5, 3)
+    least_epoch = np.random.normal(epochs*0.1, 1)
     if least_epoch <= 1:
         least_epoch = 1
     elif least_epoch > epochs:
