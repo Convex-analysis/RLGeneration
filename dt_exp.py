@@ -59,6 +59,62 @@ def main(filename):
     RTGrewards = discount_cumsum(rewards, 1)
     
     
+    trajectories = []
+    trajectory = {
+        'episode':'',
+        'state': [],
+        'action': [],
+        'reward': [],
+        }
+    former_episode = episodes[0]
+    for i in range(len(episodes)):
+        episode = episodes[i]
+        #if new episode, add former trajectory to trajectories and create new trajectory
+        if episode != former_episode:
+            trajectories.append(trajectory)
+            trajectory = {
+                'episode':'',
+                'state': [],
+                'action': [],
+                'reward': [],
+                }
+        #add data to trajectory
+        trajectory['episode'] = episode
+        trajectory['state'].append(states[i])
+        trajectory['action'].append(actions[i])
+        trajectory['reward'].append(rewards[i])
+        #update former episode
+        former_episode = episode
+    
+    #save all trajectory information into separate lists    
+    path_state, traj_lens, path_returns = [], [], []    
+    for path in trajectories:
+        path_state.append(path['state'])
+        traj_lens.append(len(path['state']))
+        path_returns.append(np.sum(path['reward']))
+    
+    traj_lens, path_returns = np.array(traj_lens), np.array(path_returns)
+
+    # normalize returns
+    path_state = np.concatenate(path_state, axis=0)
+    state_mean, state_std = np.mean(path_state, axis=0), np.std(path_state, axis=0)
+    
+    num_timesteps = sum(traj_lens)
+    
+
+    sorted_index = np.argsort(path_returns) # low to high
+    num_trajectories = 1
+    timestep = traj_lens[sorted_index[-1]]# find the trajectory with the highest return and get its length
+    # find the number of trajectories that fit in the num_timesteps
+    index = len(trajectories) - 2 #the index here denote the index of the trajectory with the next highest return
+    # iterate through the trajectories in descending order of return
+    while index >= 0 and timestep + traj_lens[sorted_index[index]] <= num_timesteps:
+        timestep += traj_lens[sorted_index[index]]
+        num_trajectories += 1
+        index -= 1
+
+
+
     model_type = DTconfig['model_type']
     model, optimizer, scheduler = get_model_optimizer(DTconfig, state_dim, action_dim, max_ep_len, device)
     print(f"{model_type}: #parameters = {sum(p.numel() for p in model.parameters())}")
