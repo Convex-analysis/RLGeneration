@@ -26,6 +26,7 @@ def main(filename):
     state_dim = STATE
     action_dim = ACTION
     max_ep_len = 1000
+    env_targets = [20, 50, 100]
     #load data from csv file
     df = pd.read_csv(filename)
     
@@ -112,7 +113,23 @@ def main(filename):
         timestep += traj_lens[sorted_index[index]]
         num_trajectories += 1
         index -= 1
+    # get the trajectories with the highest returns
+    sorted_index = sorted_index[-num_trajectories:]
+    
+    
+    prob_sample = traj_lens[sorted_index] / sum(traj_lens[sorted_index])
 
+    start_time = datetime.now().replace(microsecond=0)
+    start_time_str = start_time.strftime("%y-%m-%d-%H-%M-%S")
+    environment = 'DT'
+    save_model_name = model_type + "_" + environment + ".cpt"
+
+
+    # setup output dir and yaml file
+    output_dir = get_outdir('./output/train', 'DT')
+    args_dir = os.path.join(output_dir, 'args.yaml')
+    with open(args_dir, 'w') as f:
+        f.write(yaml.safe_dump(DTconfig, default_flow_style=False))
 
 
     model_type = DTconfig['model_type']
@@ -130,17 +147,17 @@ def main(filename):
             np.arange(num_trajectories),
             size=batch_size,
             replace=True,
-            p=p_sample,  # reweights so we sample according to timesteps
+            p=prob_sample,  # reweights so we sample according to timesteps
         )
 
         s, a, r, d, rtg, timesteps, mask = [], [], [], [], [], [], []
         for i in range(batch_size):
-            traj = trajectories[int(sorted_inds[batch_inds[i]])]
+            traj = trajectories[int(sorted_index[batch_inds[i]])]
             si = random.randint(0, traj['rewards'].shape[0] - 1)
 
             # get sequences from dataset
             s.append(traj['observations'][si:si + max_len].reshape(1, -1, state_dim))
-            a.append(traj['actions'][si:si + max_len].reshape(1, -1, act_dim))
+            a.append(traj['actions'][si:si + max_len].reshape(1, -1, action_dim))
             r.append(traj['rewards'][si:si + max_len].reshape(1, -1, 1))
             if 'terminals' in traj:
                 d.append(traj['terminals'][si:si + max_len].reshape(1, -1))
@@ -156,7 +173,7 @@ def main(filename):
             tlen = s[-1].shape[1]
             s[-1] = np.concatenate([np.zeros((1, max_len - tlen, state_dim)), s[-1]], axis=1)
             s[-1] = (s[-1] - state_mean) / state_std
-            a[-1] = np.concatenate([np.ones((1, max_len - tlen, act_dim)) * -10., a[-1]], axis=1)
+            a[-1] = np.concatenate([np.ones((1, max_len - tlen, action_dim)) * -10., a[-1]], axis=1)
             r[-1] = np.concatenate([np.zeros((1, max_len - tlen, 1)), r[-1]], axis=1)
             d[-1] = np.concatenate([np.ones((1, max_len - tlen)) * 2, d[-1]], axis=1)
             rtg[-1] = np.concatenate([np.zeros((1, max_len - tlen, 1)), rtg[-1]], axis=1) / scale
