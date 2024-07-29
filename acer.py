@@ -252,7 +252,7 @@ gamma = 0.99                # discount factor
 lr_actor = 0.0003       # learning rate for actor network
 lr_critic = 0.001       # learning rate for critic network
 random_seed = 0       # set random seed
-max_training_timesteps = 500*len(vehicle_list)   # break from training loop if timeteps > max_training_timesteps
+max_training_timesteps = 1000*len(vehicle_list)   # break from training loop if timeteps > max_training_timesteps
 print_freq = max_ep_len * 4     # print avg reward in the interval (in num timesteps)
 log_freq = max_ep_len * 2       # saving avg reward in the interval (in num timesteps)
 save_model_freq = max_ep_len * 4         # save model frequency (in num timesteps)
@@ -376,7 +376,7 @@ log_f.write('episode,timestep,reward\n')
 
 #data file
 data_f = open(data_file_name,"w+")
-data_f.write('episode,sequence\n')
+data_f.write('episode,timestep,state,action,reward,return\n')
 
 # printing and logging variables
 print_running_reward = 0
@@ -405,6 +405,7 @@ while time_step <= max_training_timesteps:
     states = []
     RTGactions = []
     RTGreward = []
+    dones = []
 
     for t in range(1, len(env.get_vehicle_list())+1):
         # select action with policy
@@ -412,8 +413,8 @@ while time_step <= max_training_timesteps:
         policy, q_value, value = model(state)
         
         action = policy.multinomial(1)
-        #next_state, reward, done, info, RTGaction= env.step_1(action.item())
-        next_state, reward, done, info, RTGaction= env.step_withour_alpha(action.item())
+        next_state, reward, done, info, RTGaction= env.step_1(action.item())
+        #next_state, reward, done, info, RTGaction= env.step_withour_alpha(action.item())
         '''
         #sort the policy and select the first 10 action with the highest probability
         action = policy.topk(action_dim).indices
@@ -438,6 +439,7 @@ while time_step <= max_training_timesteps:
         masks.append(mask)
         states.append(env.get_RTG_state())
         RTGactions.append(RTGaction)
+        dones.append(done)
         # log in logging file
         if time_step % log_freq == 0:
 
@@ -482,13 +484,15 @@ while time_step <= max_training_timesteps:
     trajectory = []
 
     for i in range(len(RTGreward)):
+        tsp = i
         temp_state = states[i]
         temp_action = RTGactions[i]
+        temp_reward = rewards[i].item()
         temp_RTGreward = RTGreward[i].item()
-        trajectory.append([temp_RTGreward,temp_state,temp_action])
+        data_f.write('{},{},{},{},{},{},{}\n'.format(i_episode, tsp, temp_state, temp_action, temp_reward, temp_RTGreward,dones[i]))
 
     #write the trajectory to the data file
-    data_f.write('{},{}\n'.format(i_episode, trajectory))
+   
     trajectory = []
     next_state = torch.FloatTensor(state).unsqueeze(0).to(device)
     _, _, retrace = model(next_state)
@@ -509,7 +513,7 @@ while time_step <= max_training_timesteps:
     
 
 log_f.close()
-
+data_f.close()
 ################################ End of Part II ################################
 
 print("============================================================================================")

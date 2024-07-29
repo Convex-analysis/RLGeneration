@@ -214,6 +214,7 @@ class Environment():
         #return the next state, reward, done, and info
         if len(self.vehicle_queue) == 0:
             print("The vehicle list is empty, the environment is done.")
+            done = True
             next_state = self.get_state()
         else:
             next_state = self.get_state()
