@@ -9,6 +9,7 @@ import yaml
 import numpy as np
 import pandas as pd
 import torch
+from env import Environment, load_csv
 
 
 from util.trainer import Trainer, get_env_info, evaluate_episode_rtg, get_model_optimizer
@@ -21,12 +22,15 @@ ACTION = 20
 
 
 def main(filename):
+    vehicle_list = load_csv(filename)
+    env = Environment(vehicle_list)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'  #variant.get('device', 'cuda')
     set_seed(SEED)
     state_dim = STATE
     action_dim = ACTION
     max_ep_len = 1000
     env_targets = [20, 50, 100]
+    scale = 1000
     #load data from csv file
     df = pd.read_csv(filename)
     
@@ -44,7 +48,8 @@ def main(filename):
         'weight_decay':'1e-4',
         'batch_size':'32',
         'max_iters':'10',
-        'num_steps_per_iter':'1000'
+        'num_steps_per_iter':'1000',
+        'num_eval_episodes':'100'
     }
     
     
@@ -193,12 +198,12 @@ def main(filename):
     def eval_episodes(target):
         def fn(model):
             returns, lengths = [], []
-            for _ in range(variant['num_eval_episodes']):
+            for _ in range(DTconfig['num_eval_episodes']):
                 with torch.no_grad():
                     ret, length = evaluate_episode_rtg(
                         env,
                         state_dim,
-                        act_dim,
+                        action_dim,
                         model,
                         max_ep_len=max_ep_len,
                         scale=scale,
