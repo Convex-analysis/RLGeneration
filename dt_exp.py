@@ -106,16 +106,31 @@ def main(filename):
     #seprate the state into resourcepool, vehicle depart time, vehicle arrival time, communication time and alpha
     for state in path_state:
         state = state.split(',')
-        resourcepool = state[1:-4]
         
-        vehicle_depart_time = state[-4]
-        vehicle_arrival_time = state[-3]
-        communication_time = state[-2]
-        alpha = state[-1].split(']')[0]
+        resourcepool = state[0:-4]
+        #delete the first character '['
+        resourcepool[0] = resourcepool[0][1:]
+        #transform the resourcepool into a string
+        resourcepool = ','.join(resourcepool)
+        resourcepool.replace(', ', ',')
+        #let the string in [] to be a array
+        resourcepool = resourcepool.split(']')
+        resourcepool = [x.split('[')[1] for x in resourcepool if x != '']
+        resourcepool = [x.split(',') for x in resourcepool]
+        resourcecap = [int(x[1])-int(x[0]) for x in resourcepool]
+        
+        
+        vehicle_depart_time = state[-4].strip()
+        length = vehicle_depart_time.isdigit()
+        vehicle_arrival_time = state[-3].strip()
+        communication_time = state[-2].strip()
+        alpha = state[-1].split(']')[0].strip()
+        vehicle_depart_time, vehicle_arrival_time, communication_time, alpha = float(vehicle_depart_time), float(vehicle_arrival_time), float(communication_time), float(alpha)
+        #satate = resourcepool + vehicle_depart_time + vehicle_arrival_time + communication_time + alpha
         
     
-    state_mean = np.mean(path_state, axis=0)
-    state_std = np.std(path_state, axis=0)
+    #state_mean = np.mean(path_state, axis=0)
+    #state_std = np.std(path_state, axis=0)
     num_timesteps = sum(traj_lens)
     
 
@@ -188,7 +203,7 @@ def main(filename):
             # padding and state + reward normalization
             tlen = s[-1].shape[1]
             s[-1] = np.concatenate([np.zeros((1, max_len - tlen, state_dim)), s[-1]], axis=1)
-            s[-1] = (s[-1] - state_mean) / state_std
+            #s[-1] = (s[-1] - state_mean) / state_std
             a[-1] = np.concatenate([np.ones((1, max_len - tlen, action_dim)) * -10., a[-1]], axis=1)
             r[-1] = np.concatenate([np.zeros((1, max_len - tlen, 1)), r[-1]], axis=1)
             d[-1] = np.concatenate([np.ones((1, max_len - tlen)) * 2, d[-1]], axis=1)
@@ -220,8 +235,6 @@ def main(filename):
                         scale=scale,
                         target_return=target/scale,
                         mode=DTconfig['model_type'],
-                        state_mean=state_mean,
-                        state_std=state_std,
                         device=device
                     )
                 returns.append(ret)
