@@ -1,10 +1,9 @@
 import time
 import numpy as np
 import torch
-import gym
 
-from models.decision_transformer import DecisionTransformer
-from models.decision_mamba import DecisionMamba
+from model.decision_transformer import DecisionTransformer
+from model.decision_mamba import DecisionMamba
 
 
 class Trainer:
@@ -102,33 +101,6 @@ class Trainer:
 
         return loss.detach().cpu().item()
 
-
-def get_env_info(env_name, dataset):
-    if env_name == 'hopper':
-        env = gym.make('Hopper-v3')
-        max_ep_len = 1000
-        env_targets = [1800, 3600, 7200, 36000, 72000]  # evaluation conditioning targets
-        scale = 1000.  # normalization for rewards/returns
-    elif env_name == 'halfcheetah':
-        env = gym.make('HalfCheetah-v3')
-        max_ep_len = 1000
-        env_targets = [6000, 12000, 24000, 120000, 240000]
-        scale = 1000.
-    elif env_name == 'walker2d':
-        env = gym.make('Walker2d-v3')
-        max_ep_len = 1000
-        env_targets = [2500, 5000, 10000, 50000, 100000]
-        scale = 1000.
-    #elif env_name == 'antmaze':
-        #import d4rl
-    #    env = gym.make(f'{env_name}-{dataset}-v2')
-    #    max_ep_len = 1000
-    #    env_targets = [1.0, 10.0, 1000.0, 100000.0] # successful trajectories have returns of 1, unsuccessful have returns of 0
-    #    scale = 1.
-    else:
-        raise NotImplementedError
-
-    return env, max_ep_len, env_targets, scale
 
 
 def evaluate_episode_rtg(

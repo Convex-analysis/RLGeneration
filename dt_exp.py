@@ -12,17 +12,17 @@ import torch
 from env import Environment, load_csv
 
 
-from util.trainer import Trainer, get_env_info, evaluate_episode_rtg, get_model_optimizer
+from util.trainer import Trainer, evaluate_episode_rtg, get_model_optimizer
 from util.utils import set_seed, discount_cumsum, get_outdir, update_summary
 
 
 SEED = 1
 STATE = 24
 ACTION = 20
-
+Vlist = 'vehicle_settings.csv'
 
 def main(filename):
-    vehicle_list = load_csv(filename)
+    vehicle_list = load_csv(Vlist)
     env = Environment(vehicle_list)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'  #variant.get('device', 'cuda')
     set_seed(SEED)
@@ -32,7 +32,7 @@ def main(filename):
     env_targets = [20, 50, 100]
     scale = 1000
     #load data from csv file
-    df = pd.read_csv(filename)
+    df = pd.read_csv(filename, sep=';')
     
     DTconfig = {
         'model_type':'dt',
@@ -55,7 +55,7 @@ def main(filename):
     
     
     #TODO create dataset
-    episodes, timesteps, states, actions, rewards, RTGrewards,dones = [], [], [], [], [], []
+    episodes, timesteps, states, actions, rewards, RTGrewards,dones = [], [], [], [], [], [],[]
     episodes = df['episode'].values
     timesteps = df['timestep'].values
     states = df['state'].values
@@ -103,8 +103,19 @@ def main(filename):
 
     # normalize returns
     path_state = np.concatenate(path_state, axis=0)
-    state_mean, state_std = np.mean(path_state, axis=0), np.std(path_state, axis=0)
+    #seprate the state into resourcepool, vehicle depart time, vehicle arrival time, communication time and alpha
+    for state in path_state:
+        state = state.split(',')
+        resourcepool = state[1:-4]
+        
+        vehicle_depart_time = state[-4]
+        vehicle_arrival_time = state[-3]
+        communication_time = state[-2]
+        alpha = state[-1].split(']')[0]
+        
     
+    state_mean = np.mean(path_state, axis=0)
+    state_std = np.std(path_state, axis=0)
     num_timesteps = sum(traj_lens)
     
 
@@ -145,7 +156,7 @@ def main(filename):
     
     
     #***** ** utils ** *****
-    def get_batch(batch_size=256, max_len=K):
+    def get_batch(batch_size=256, max_len=DTconfig['K']):
         # Dynamically recompute p_sample if online training
 
         batch_inds = np.random.choice(
@@ -208,20 +219,20 @@ def main(filename):
                         max_ep_len=max_ep_len,
                         scale=scale,
                         target_return=target/scale,
-                        mode=mode,
+                        mode=DTconfig['model_type'],
                         state_mean=state_mean,
                         state_std=state_std,
                         device=device
                     )
                 returns.append(ret)
                 lengths.append(length)
-            reward_min = infos.REF_MIN_SCORE[f"{env_name}-{dataset}-v2"]
-            reward_max = infos.REF_MAX_SCORE[f"{env_name}-{dataset}-v2"]
+            #reward_min = infos.REF_MIN_SCORE[f"{env_name}-{dataset}-v2"]
+            #reward_max = infos.REF_MAX_SCORE[f"{env_name}-{dataset}-v2"]
             return {
                 f'target_{target}_return_mean': np.mean(returns),
                 f'target_{target}_return_std': np.std(returns),
                 f'target_{target}_length_mean': np.mean(lengths),
-                f'target_{target}_d4rl_score': (np.mean(returns) - reward_min) * 100 / (reward_max - reward_min),  # compute the normalized reward, see https://github.com/Farama-Foundation/D4RL/blob/master/d4rl/offline_env.py#L71
+                #f'target_{target}_d4rl_score': (np.mean(returns) - reward_min) * 100 / (reward_max - reward_min),  # compute the normalized reward, see https://github.com/Farama-Foundation/D4RL/blob/master/d4rl/offline_env.py#L71
             }
         return fn
     #***** ***** ***** *****
@@ -261,3 +272,8 @@ def main(filename):
         'optimizer': optimizer.state_dict(),
     }
     torch.save(save_state, os.path.join(output_dir, save_model_name))
+    
+    
+if __name__ == '__main__':
+    filename = 'ACER_files/data/18_data.csv'
+    main(filename)

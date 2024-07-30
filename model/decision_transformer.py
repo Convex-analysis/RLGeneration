@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import transformers
 
-from trajectory_gpt2 import GPT2Model
+from model.trajectory_gpt2 import GPT2Model
 
 
 class TrajectoryModel(nn.Module):

@@ -376,7 +376,7 @@ log_f.write('episode,timestep,reward\n')
 
 #data file
 data_f = open(data_file_name,"w+")
-data_f.write('episode,timestep,state,action,reward,return\n')
+data_f.write('episode;timestep;state;action;reward;return\n')
 
 # printing and logging variables
 print_running_reward = 0
@@ -489,7 +489,7 @@ while time_step <= max_training_timesteps:
         temp_action = RTGactions[i]
         temp_reward = rewards[i].item()
         temp_RTGreward = RTGreward[i].item()
-        data_f.write('{},{},{},{},{},{},{}\n'.format(i_episode, tsp, temp_state, temp_action, temp_reward, temp_RTGreward,dones[i]))
+        data_f.write('{};{};{};{};{};{};{}\n'.format(i_episode, tsp, temp_state, temp_action, temp_reward, temp_RTGreward,dones[i]))
 
     #write the trajectory to the data file
    
