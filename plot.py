@@ -19,5 +19,5 @@ def plot(filename,x, y):
 
 if __name__ == "__main__":
     path = "ACER_files/resource_allocation/stability/"
-    filename = "ACER_resource_allocation_log_17.csv"
+    filename = "ACER_resource_allocation_log_9.csv"
     plot(path + filename, "episode", "reward")
