@@ -6,3 +6,7 @@ python randomTrips.py -n xxx.net.xml -r xxxx.rou.xml -e 1000 -p 10 --random
 --random 加上的话trips每次都不一样
 
 sumo  --tripinfo-output  xxxx.xml   -c  <config_file_name.sumo.cfg>    
+
+高密度车流量 1000s 100 vehicles  
+低密度车流量 1000s 50 vehicles
+
