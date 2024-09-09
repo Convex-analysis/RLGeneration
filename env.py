@@ -9,6 +9,7 @@ from collections import deque
 ONE_ROUND_TIME = 1000
 REQUIRED_EPOCHS = 10
 AVAILABLE_BANDWIDTH = 3
+REQUIRED_CLIENTS = 20
 
 def load_csv(file):
     df = pd.read_csv(file)
@@ -212,8 +213,8 @@ class Environment():
         #update the scheduled vehicle list
         self.scheduled_vehicle.append(current_vehicle)
         #return the next state, reward, done, and info
-        if len(self.vehicle_queue) == 0:
-            print("The vehicle list is empty, the environment is done.")
+        if len(self.vehicle_queue) == 0 or len(self.scheduled_vehicle) >= REQUIRED_CLIENTS:
+            #print("The vehicle list is empty, the environment is done.")
             done = True
             next_state = self.get_state()
         else:
@@ -310,7 +311,7 @@ class Environment():
     
     def get_state(self):
         current_state = []
-        if len(self.vehicle_queue) == 0:
+        if len(self.vehicle_queue) == 0 or len(self.scheduled_vehicle)>=REQUIRED_CLIENTS:
             vehicle = Vehicle(0, 0, 0, 0, 0, 0, 0)
         else:    
             vehicle = self.vehicle_queue[0]
