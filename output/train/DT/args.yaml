@@ -1,0 +1,15 @@
+K: 20
+activation_function: gelu
+batch_size: 32
+dropout: 0.1
+embed_dim: 128
+learning_rate: 0.001
+max_iters: 10
+model_type: dt
+n_head: 1
+n_layer: 3
+num_eval_episodes: 100
+num_steps_per_iter: 1000
+remove_act_embs: 'true'
+warmup_steps: 1000
+weight_decay: 0.0001

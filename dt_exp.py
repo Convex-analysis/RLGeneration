@@ -36,20 +36,20 @@ def main(filename):
     
     DTconfig = {
         'model_type':'dt',
-        'embed_dim':'128',
-        'K':'20',
+        'embed_dim':128,
+        'K':20,
         'remove_act_embs':'true',
-        'n_layer':'3',
-        'n_head':'1',
+        'n_layer':3,
+        'n_head':1,
         'activation_function':'gelu',
-        'dropout':'0.1',
-        'warmup_steps':'1000',
-        'learning_rate':'1e-3',
-        'weight_decay':'1e-4',
-        'batch_size':'32',
-        'max_iters':'10',
-        'num_steps_per_iter':'1000',
-        'num_eval_episodes':'100'
+        'dropout':0.1,
+        'warmup_steps':1000,
+        'learning_rate':1e-3,
+        'weight_decay':1e-4,
+        'batch_size':32,
+        'max_iters':10,
+        'num_steps_per_iter':1000,
+        'num_eval_episodes':100
     }
     
     
@@ -104,29 +104,30 @@ def main(filename):
     # normalize returns
     path_state = np.concatenate(path_state, axis=0)
     #seprate the state into resourcepool, vehicle depart time, vehicle arrival time, communication time and alpha
-    for state in path_state:
+    for i, state in enumerate(path_state):
         state = state.split(',')
-        
-        resourcepool = state[0:-4]
-        #delete the first character '['
-        resourcepool[0] = resourcepool[0][1:]
-        #transform the resourcepool into a string
-        resourcepool = ','.join(resourcepool)
-        resourcepool.replace(', ', ',')
-        #let the string in [] to be a array
-        resourcepool = resourcepool.split(']')
-        resourcepool = [x.split('[')[1] for x in resourcepool if x != '']
-        resourcepool = [x.split(',') for x in resourcepool]
-        resourcecap = [int(x[1])-int(x[0]) for x in resourcepool]
-        
-        
-        vehicle_depart_time = state[-4].strip()
-        length = vehicle_depart_time.isdigit()
-        vehicle_arrival_time = state[-3].strip()
-        communication_time = state[-2].strip()
-        alpha = state[-1].split(']')[0].strip()
-        vehicle_depart_time, vehicle_arrival_time, communication_time, alpha = float(vehicle_depart_time), float(vehicle_arrival_time), float(communication_time), float(alpha)
-        #satate = resourcepool + vehicle_depart_time + vehicle_arrival_time + communication_time + alpha
+        if len(state) > 5:
+            resourcepool = state[0:-4]
+            #delete the first character '['
+            resourcepool[0] = resourcepool[0][1:]
+            #transform the resourcepool into a string
+            resourcepool = ','.join(resourcepool)
+            resourcepool.replace(', ', ',')
+            #let the string in [] to be a array
+            resourcepool = resourcepool.split(']')
+            resourcepool = [x.split('[')[1] for x in resourcepool if x != '']
+            resourcepool = [x.split(',') for x in resourcepool]
+            resourcecap = [int(x[1])-int(x[0]) for x in resourcepool]
+                
+                
+            vehicle_depart_time = state[-4].strip()
+            length = vehicle_depart_time.isdigit()
+            vehicle_arrival_time = state[-3].strip()
+            communication_time = state[-2].strip()
+            alpha = state[-1].split(']')[0].strip()
+            vehicle_depart_time, vehicle_arrival_time, communication_time, alpha = float(vehicle_depart_time), float(vehicle_arrival_time), float(communication_time), float(alpha)
+            #satate = resourcepool + vehicle_depart_time + vehicle_arrival_time + communication_time + alpha
+            
         
     
     #state_mean = np.mean(path_state, axis=0)
@@ -149,7 +150,7 @@ def main(filename):
     
     
     prob_sample = traj_lens[sorted_index] / sum(traj_lens[sorted_index])
-
+    model_type = DTconfig['model_type']
     start_time = datetime.now().replace(microsecond=0)
     start_time_str = start_time.strftime("%y-%m-%d-%H-%M-%S")
     environment = 'DT'
@@ -163,7 +164,7 @@ def main(filename):
         f.write(yaml.safe_dump(DTconfig, default_flow_style=False))
 
 
-    model_type = DTconfig['model_type']
+    
     model, optimizer, scheduler = get_model_optimizer(DTconfig, state_dim, action_dim, max_ep_len, device)
     print(f"{model_type}: #parameters = {sum(p.numel() for p in model.parameters())}")
     loss_fn = lambda a_hat, a: torch.mean((a_hat - a)**2)
@@ -184,19 +185,19 @@ def main(filename):
         s, a, r, d, rtg, timesteps, mask = [], [], [], [], [], [], []
         for i in range(batch_size):
             traj = trajectories[int(sorted_index[batch_inds[i]])]
-            si = random.randint(0, traj['rewards'].shape[0] - 1)
+            si = random.randint(0, traj['reward'].shape[0] - 1)
 
             # get sequences from dataset
-            s.append(traj['observations'][si:si + max_len].reshape(1, -1, state_dim))
-            a.append(traj['actions'][si:si + max_len].reshape(1, -1, action_dim))
-            r.append(traj['rewards'][si:si + max_len].reshape(1, -1, 1))
+            s.append(traj['state'][si:si + max_len].reshape(1, -1, state_dim))
+            a.append(traj['action'][si:si + max_len].reshape(1, -1, action_dim))
+            r.append(traj['reward'][si:si + max_len].reshape(1, -1, 1))
             if 'terminals' in traj:
                 d.append(traj['terminals'][si:si + max_len].reshape(1, -1))
             else:
                 d.append(traj['dones'][si:si + max_len].reshape(1, -1))
             timesteps.append(np.arange(si, si + s[-1].shape[1]).reshape(1, -1))
             timesteps[-1][timesteps[-1] >= max_ep_len] = max_ep_len-1  # padding cutoff
-            rtg.append(discount_cumsum(traj['rewards'][si:], gamma=1.)[:s[-1].shape[1] + 1].reshape(1, -1, 1))
+            rtg.append(discount_cumsum(traj['reward'][si:], gamma=1.)[:s[-1].shape[1] + 1].reshape(1, -1, 1))
             if rtg[-1].shape[1] <= s[-1].shape[1]:
                 rtg[-1] = np.concatenate([rtg[-1], np.zeros((1, 1, 1))], axis=1)
 
