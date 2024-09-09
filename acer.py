@@ -244,10 +244,14 @@ def transform_return_to_go(rewards):
     return RTGreward
 
 
-
 if __name__ == "__main__": 
     print("setting training environment : ")
-    vehicle_list = load_csv('vehicle_settings.csv')
+    vehicle_list = []
+    default_path = "./highdensity/"
+    for file in os.listdir(default_path):
+        if file.endswith(".csv") and file.startswith("Trip"):
+            vehicle_list.extend(load_csv(default_path + file))
+    #vehicle_list = load_csv('vehicle_settings.csv')
     max_ep_len = len(vehicle_list)            # max timesteps in one episode
     gamma = 0.99                # discount factor
     lr_actor = 0.0003       # learning rate for actor network
@@ -479,8 +483,9 @@ if __name__ == "__main__":
         
             # break; if the episode is over
             if done:
-                scheduled_vehicle_list = env.get_scheduled_vehicle()
-                print("The number of vehicles that have been scheduled is: ", len(scheduled_vehicle_list))
+                current_round_peroid, longest_vehicle_depart = env.statistic_scheduled_vehicles()
+                print("The current round peroid is: ", current_round_peroid)
+                print("The longest vehicle depart time is: ", longest_vehicle_depart)
                 break
         RTGreward = transform_return_to_go(rewards)
         #merge action, state, and RTGreward into one array, the format is [RTGreward,state, action]

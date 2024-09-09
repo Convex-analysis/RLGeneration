@@ -46,8 +46,21 @@ class Vehicle():
         return self.communication
     def get_alpha(self):
         return self.alpha
-        
-        
+    def set_id(self, id):
+        self.id = id
+    def set_depart(self, depart):
+        self.depart = depart
+    def set_duration(self, duration):
+        self.duration = duration
+    def set_arrival(self,arrival):
+        self.arrival = arrival
+    def set_train(self, train):
+        self.train = train
+    def set_communication(self, communication):
+        self.communication = communication
+    def set_alpha(self, alpha):
+         self.alpha = alpha
+
 
 class Environment():
     def __init__(self, vehicle_list):
@@ -176,6 +189,9 @@ class Environment():
                     selected_resource_block[0] = resource_block[0] - gap
                     selected_resource_block[1] = resource_block[1] - gap
                     selected_resource_block[2] = rb_bandwidth
+                    #update the current vehicle's train time and alpha
+                    current_vehicle.set_alpha(alpha)
+                    current_vehicle.set_train(current_train)
         if selected_resource_block[2] == 0:
             return self.get_state(), 0, False, {"vehicle %d cannot be scheduled, because there is no available resource block.", current_vehicle.get_id()},[self.resource_block_decoder(self.current_state[action]),alpha]
         #get the corresponding resource pool
@@ -301,9 +317,15 @@ class Environment():
         info = {"Success to schedule the vehicle %d", current_vehicle.get_id()}
         RTG_actoin = [self.resource_block_decoder(self.current_state[action]),alpha]
         return next_state, reward, done, info, RTG_actoin
-    def reset(self):
+    
+
+    def reset(self, replacelist = []):
         self.time = 0
-        self.vehicle_queue = deque(self.vehicle_list)
+        if replacelist == []:
+            self.vehicle_queue = deque(self.vehicle_list)
+        else:
+            self.vehicle_queue = deque(replacelist)
+            self.vehicle_list = replacelist
         self.scheduled_vehicle = []
         for i in range(1, AVAILABLE_BANDWIDTH+1):
             self.resourcepool[str(i)] = [[0, ONE_ROUND_TIME]]
@@ -410,6 +432,18 @@ class Environment():
             print("The start time of the resource block is out of the range.")
         return [start_time, end_time, bandwith_index]
     
+    #get statistics of the scheduled vehicles in current round
+    def statistic_scheduled_vehicles(self):
+        current_round_peroid = 0
+        longest_vehicle_depart = 0
+        for vehicle in self.scheduled_vehicle:
+            completed_time_slot = vehicle.get_depart() + vehicle.get_communication() + vehicle.get_train()
+            if vehicle.get_depart() > longest_vehicle_depart:
+                longest_vehicle_depart = vehicle.get_depart()
+            if completed_time_slot > current_round_peroid:
+                current_round_peroid = completed_time_slot
+        return current_round_peroid, longest_vehicle_depart
+
     def get_RTG_state(self):
         RTG_state = []
         for item in self.current_state[:-4]:
