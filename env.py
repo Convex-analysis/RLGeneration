@@ -411,9 +411,10 @@ class Environment():
     
     def get_reward(self, selected_resource_block):
         duration = selected_resource_block[1] - selected_resource_block[0]
-        scheduled_vehicle_count = len(self.scheduled_vehicle)
+        current_vehicle = self.scheduled_vehicle[-1]
+        scheudled_time_slot = current_vehicle.get_depart() + current_vehicle.get_train() + current_vehicle.get_communication()
         improved_resource_utilization = duration/(ONE_ROUND_TIME*AVAILABLE_BANDWIDTH)
-        reward = 1 + improved_resource_utilization
+        reward = 1 + improved_resource_utilization + (1-scheudled_time_slot/ONE_ROUND_TIME)
         return reward   
     
     def resource_block_encoder(self, resource_block, bandwith_index):
@@ -442,7 +443,7 @@ class Environment():
                 longest_vehicle_depart = vehicle.get_depart()
             if completed_time_slot > current_round_peroid:
                 current_round_peroid = completed_time_slot
-        return current_round_peroid, longest_vehicle_depart
+        return current_round_peroid, longest_vehicle_depart, len(self.scheduled_vehicle)
 
     def get_RTG_state(self):
         RTG_state = []

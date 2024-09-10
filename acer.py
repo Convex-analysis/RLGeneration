@@ -6,6 +6,7 @@ import torch.nn as nn
 import random
 import numpy as np
 import torch.optim as optim
+import pandas as pd
 from time import sleep
 from env import Environment, load_csv
 
@@ -308,13 +309,8 @@ class simulation():
         np.random.seed(self.random_seed)
 
 
-    def training_episode(self, checkpoint_path, time_step=0, i_episode=0, num_steps=50):
+    def training_episode(self, checkpoint_path, time_step=0, i_episode=0, num_steps=50,print_running_reward=0, print_running_episodes=0, log_running_reward=0, log_running_episodes=0):
         # printing and logging variables
-        print_running_reward = 0
-        print_running_episodes = 0
-
-        log_running_reward = 0
-        log_running_episodes = 0
         
         state = self.env.reset()
         current_ep_reward = 0
@@ -324,8 +320,9 @@ class simulation():
         actions  = []
         rewards  = []
         masks    = []
-        states = []
         dones = []
+        
+        current_round_peroid, longest_vehicle_depart, scheduled_number = 0, 0, 0
 
         for t in range(1, len(self.env.get_vehicle_list())+1):
             # select action with policy
@@ -347,7 +344,6 @@ class simulation():
             rewards.append(reward)
             values.append(value)
             masks.append(mask)
-            states.append(self.env.get_RTG_state())
             dones.append(done)
             # log in logging file
             if time_step % self.log_freq == 0:
@@ -364,7 +360,7 @@ class simulation():
                 log_running_episodes = 0
             
             # printing average reward
-            if time_step % self.print_freq == 0 and print_running_episodes != 0:
+            if time_step % self.print_freq == 0:
 
                 # print average reward till last episode
                 print_avg_reward = print_running_reward / print_running_episodes
@@ -387,9 +383,7 @@ class simulation():
         
             # break; if the episode is over
             if done:
-                current_round_peroid, longest_vehicle_depart = self.env.statistic_scheduled_vehicles()
-                print("The current round peroid is: ", current_round_peroid)
-                print("The longest vehicle depart time is: ", longest_vehicle_depart)
+                current_round_peroid, longest_vehicle_depart, scheduled_number = self.env.statistic_scheduled_vehicles()
                 break
         next_state = torch.FloatTensor(state).unsqueeze(0).to(device)
         _, _, retrace = self.model(next_state)
@@ -408,7 +402,7 @@ class simulation():
         i_episode += 1
         time_step += num_steps
         
-        return time_step, i_episode
+        return time_step, i_episode, print_running_reward, print_running_episodes, log_running_reward, log_running_episodes,current_round_peroid, longest_vehicle_depart, scheduled_number
 
 
         
@@ -498,28 +492,60 @@ class simulation():
         self.log_f = open(log_f_name,"w+")
         self.log_f.write('episode,timestep,reward\n')
         
+        print_running_reward = 0
+        print_running_episodes = 0
+
+        log_running_reward = 0
+        log_running_episodes = 0
 
         time_step = 0
         i_episode = 0
         num_steps    = 50
-        log_interval = 10
+
+        longest_vehicle_depart_list = []
+        round_peroid_list = []
+        scheduled_number_list = []
 
         # start training loop
         while time_step <= self.max_training_timesteps:
-            time_step, i_episode = self.training_episode(checkpoint_path, time_step, i_episode, num_steps)
-        end_time = datetime.now().replace(microsecond=0)
-        self.log_f.close()
-    ################################ End of Part II ################################
+            # train for an episode
+            time_step, i_episode, print_running_reward, print_running_episodes, log_running_reward, log_running_episodes,current_round_peroid, longest_vehicle_depart, scheduled_number = self.training_episode(checkpoint_path, time_step, i_episode, num_steps,print_running_reward, print_running_episodes, log_running_reward, log_running_episodes)
+            # store the results
+            longest_vehicle_depart_list.append(longest_vehicle_depart)
+            round_peroid_list.append(current_round_peroid)
+            scheduled_number_list.append(scheduled_number)
 
-    print("============================================================================================")
+        self.log_f.close()
+        return longest_vehicle_depart_list, round_peroid_list,scheduled_number_list
+
 
 if __name__ == "__main__": 
+    SM = simulation()
     filelist = []
+    df = pd.DataFrame(columns = ["round", "longest_vehicle_depart", "round_peroid", "scheduled_number"])
+    round_count = 0
     default_path = "./highdensity/"
     for file in os.listdir(default_path):
         if file.endswith(".csv") and file.startswith("Trip"):
             filelist.append(file)
-    vehicle_list = load_csv("vehicle_settings.csv")
-    SM = simulation()
-    SM.simulate_process("vehicle_settings.csv")
+    for file in filelist:
+        longest_vehicle_depart_list, round_peroid_list, scheduled_number_list = [], [], []
+        print("Loading file: ", file)
+        longest_vehicle_depart_list, round_peroid_list, scheduled_number_list = SM.simulate_process(default_path + file)
+        round_count += 1
+        #delete the zero value in the list
+        longest_vehicle_depart_list = [x for x in longest_vehicle_depart_list if x != 0]
+        round_peroid_list = [x for x in round_peroid_list if x != 0]
+        scheduled_number_list = [x for x in scheduled_number_list if x != 0]
+        
+        avg_longest_vehicle_depart = sum(longest_vehicle_depart_list) / len(longest_vehicle_depart_list)
+        avg_round_peroid = sum(round_peroid_list) / len(round_peroid_list)
+        avg_scheduled_number = sum(scheduled_number_list) / len(scheduled_number_list)
+        
+        log = [round_count, avg_longest_vehicle_depart, avg_round_peroid, avg_scheduled_number]
+        #add the log to the dataframe
+        df.loc[len(df)] = log
+    
+    df.to_csv("result.csv", index=False)
+
 
