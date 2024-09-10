@@ -188,7 +188,7 @@ class simulation():
         self.lr_actor = 0.0003       # learning rate for actor network
         self.lr_critic = 0.001       # learning rate for critic network
         self.random_seed = 0       # set random seed
-        self.max_training_timesteps = 100*self.max_ep_len   # break from training loop if timeteps > max_training_timesteps
+        self.max_training_timesteps = 300*self.max_ep_len   # break from training loop if timeteps > max_training_timesteps
         self.print_freq = self.max_ep_len * 4     # print avg reward in the interval (in num timesteps)
         self.log_freq = self.max_ep_len * 2       # saving avg reward in the interval (in num timesteps)
         self.save_model_freq = self.max_ep_len * 4         # save model frequency (in num timesteps)

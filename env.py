@@ -416,9 +416,15 @@ class Environment():
     def get_reward(self, selected_resource_block):
         duration = selected_resource_block[1] - selected_resource_block[0]
         current_vehicle = self.scheduled_vehicle[-1]
+
+        select_times = current_vehicle.get_selected_times()
+
+        data_quality = current_vehicle.get_data_quality()
+        acc_imp_factor = 5
+        accuracy_improvement = data_quality * acc_imp_factor / select_times
         scheudled_time_slot = current_vehicle.get_depart() + current_vehicle.get_train() + current_vehicle.get_communication()
         improved_resource_utilization = duration/(ONE_ROUND_TIME*AVAILABLE_BANDWIDTH)
-        reward = 1 + improved_resource_utilization + (1-scheudled_time_slot/ONE_ROUND_TIME)
+        reward = accuracy_improvement + improved_resource_utilization + (len(self.scheduled_vehicle)/REQUIRED_CLIENTS)*(1-scheudled_time_slot/ONE_ROUND_TIME)
         return reward   
     
     def resource_block_encoder(self, resource_block, bandwith_index):
