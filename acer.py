@@ -8,7 +8,8 @@ import numpy as np
 import torch.optim as optim
 import pandas as pd
 from time import sleep
-from env import Environment, load_csv
+from env import Environment
+from util.output_parser import load_csv
 
 PREDIFINED_RESOURCE_BLOCK = 20
 MAX_EPISODE_LENGTH = 200
@@ -206,8 +207,8 @@ class simulation():
     
     def initialize_environment(self, vehicle_list):
         env=Environment(vehicle_list)
-        # state space dimension, the extendral 3 dimensions here denotes depart time, arrival time and communication time
-        state_dim = PREDIFINED_RESOURCE_BLOCK + 4
+        # state space dimension, the extendral dimensions here denotes depart time, arrival time and communication time, data quality, select times
+        state_dim = PREDIFINED_RESOURCE_BLOCK + 6
         env.set_state_dim(state_dim)
         # action space dimension denotes the probability of selection different time slots
         action_dim = PREDIFINED_RESOURCE_BLOCK
