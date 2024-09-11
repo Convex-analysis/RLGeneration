@@ -1,6 +1,7 @@
 import os
 import heapq
 import math
+import re
 import pandas as pd
 import numpy as np
 from collections import deque
@@ -11,18 +12,8 @@ REQUIRED_EPOCHS = 10
 AVAILABLE_BANDWIDTH = 3
 REQUIRED_CLIENTS = 20
 
-def load_csv(file):
-    df = pd.read_csv(file)
-    df = df.sort_values(by = "depart")
-    vehicle_list = []
-    for index, row in df.iterrows():
-        vehicle = Vehicle(row["id"], row["depart"], row["duration"], row["arrival"], row["train"], row["communication"], row["alpha"])
-        vehicle_list.append(vehicle)
-    return vehicle_list
-
-
 class Vehicle():
-    def __init__(self, id, depart, duration, arrival, train, communication, alpha):
+    def __init__(self, id, depart, duration, arrival, train, communication, alpha, selected_times, data_quality):
         self.id = id
         self.depart = depart
         self.duration = duration
@@ -30,6 +21,8 @@ class Vehicle():
         self.train = train
         self.communication = communication
         self.alpha = alpha
+        self.data_qualty = data_quality
+        self.select_times = selected_times
         
     #generate the corresponding get and set methods
     def get_id(self):
@@ -46,6 +39,11 @@ class Vehicle():
         return self.communication
     def get_alpha(self):
         return self.alpha
+    def get_data_quality(self):
+        return self.data_qualty
+    def get_selected_times(self):
+        return self.select_times
+
     def set_id(self, id):
         self.id = id
     def set_depart(self, depart):
@@ -60,7 +58,6 @@ class Vehicle():
         self.communication = communication
     def set_alpha(self, alpha):
          self.alpha = alpha
-
 
 class Environment():
     def __init__(self, vehicle_list):
@@ -148,10 +145,13 @@ class Environment():
         current_alpha = current_vehicle.get_alpha()
         #update the current vehicle's total time
         current_total_time = current_train + current_communication  
-        return current_vehicle, current_depart, current_duration, current_arrival, current_train, current_communication, current_alpha, current_total_time
+        #get the current vehicle's data quality
+        current_data_quality = current_vehicle.get_data_quality()
+        current_selected_times = current_vehicle.get_selected_times()
+        return current_vehicle, current_depart, current_duration, current_arrival, current_train, current_communication, current_alpha, current_total_time, current_data_quality, current_selected_times
     
     def step_1(self,action):
-        current_vehicle, current_depart, current_duration, current_arrival, current_train, current_communication, current_alpha, current_total_time = self.get_current_vehicle()
+        current_vehicle, current_depart, current_duration, current_arrival, current_train, current_communication, current_alpha, current_total_time, current_data_quality, current_selected_times = self.get_current_vehicle()
         alpha = 1
         #update the current time of environment
         self.time = current_depart   
@@ -334,13 +334,15 @@ class Environment():
     def get_state(self):
         current_state = []
         if len(self.vehicle_queue) == 0 or len(self.scheduled_vehicle)>=REQUIRED_CLIENTS:
-            vehicle = Vehicle(0, 0, 0, 0, 0, 0, 0)
+            vehicle = Vehicle(0, 0, 0, 0, 0, 0, 0, 0, 0)
         else:    
             vehicle = self.vehicle_queue[0]
         depart = vehicle.get_depart()
         arrival = vehicle.get_arrival()
         communication = vehicle.get_communication()
         current_alpha = vehicle.get_alpha()
+        current_data_quality = vehicle.get_data_quality()
+        current_select_times = vehicle.get_selected_times()
         resourcepool = []
         for i in range(1, AVAILABLE_BANDWIDTH+1):
             for resource_block in self.resourcepool[str(i)]:
@@ -365,11 +367,13 @@ class Environment():
         current_state.append(arrival)
         current_state.append(communication)
         current_state.append(current_alpha)
+        current_state.append(current_data_quality)
+        current_state.append(current_select_times)
         self.current_state = current_state
         return current_state
         
         
-        
+     #This function is aborted   
     def get_state_old(self):
         current_state = []
         #get the current vehicle atricbutes
@@ -412,9 +416,15 @@ class Environment():
     def get_reward(self, selected_resource_block):
         duration = selected_resource_block[1] - selected_resource_block[0]
         current_vehicle = self.scheduled_vehicle[-1]
+
+        select_times = current_vehicle.get_selected_times()
+
+        data_quality = current_vehicle.get_data_quality()
+        acc_imp_factor = 5
+        accuracy_improvement = data_quality * acc_imp_factor / select_times
         scheudled_time_slot = current_vehicle.get_depart() + current_vehicle.get_train() + current_vehicle.get_communication()
         improved_resource_utilization = duration/(ONE_ROUND_TIME*AVAILABLE_BANDWIDTH)
-        reward = 1 + improved_resource_utilization + (1-scheudled_time_slot/ONE_ROUND_TIME)
+        reward = accuracy_improvement + improved_resource_utilization + (len(self.scheduled_vehicle)/REQUIRED_CLIENTS)*(1-scheudled_time_slot/ONE_ROUND_TIME)
         return reward   
     
     def resource_block_encoder(self, resource_block, bandwith_index):

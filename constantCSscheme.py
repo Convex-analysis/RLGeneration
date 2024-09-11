@@ -38,19 +38,19 @@ class ConstantCSscheme:
     #don't consider the filter but make surplus vehicles 
     def check_clients_number_without_filter(self,vehilce_list, surplus):
         current_clients = vehilce_list
-        longest_time = 0
+        longest_depart_time = 0
         success_number = 0
         for vehicle in current_clients:
             dwell_time = vehicle.get_duration()
             enteire_time = vehicle.get_communication() + vehicle.get_train()
-            completed_time = vehicle.get_depart() + enteire_time
+            completed_time = vehicle.get_depart()
             success_number += 1
             self.vehicle_list.append(vehicle)
-            if completed_time > longest_time:
-                longest_time = completed_time
+            if completed_time > longest_depart_time:
+                longest_depart_time = completed_time
             if success_number > (self.atLeastClients * surplus - 1):
-                return longest_time, success_number
-        return longest_time, success_number
+                return longest_depart_time, success_number
+        return longest_depart_time, success_number
             
     def check_clients_number_with_filter(self,vehilce_list):
         current_clients = vehilce_list
@@ -108,7 +108,7 @@ class ConstantCSscheme:
                     else:
                         continue
                 if current_schedule_flag:
-                    if vehicle.get_communication() + vehicle.get_train() > vehicle.get_duration():
+                    if vehicle.get_communication() + vehicle.get_train() <= vehicle.get_duration():
                         scheduled_vehicle_number += 1
                     break
         peroid_time = self.find_longest_time()                                      
@@ -140,9 +140,9 @@ if __name__ == "__main__":
     defalut_path = "./highdensity/"
     dataframe = pd.DataFrame()
     #control the number of surplus vehicles on the without filter function
-    surplus = 1
+    surplus = 2
     # the first row of the dataframe is the column name, which are round, required_clients, scheduled_clients, average_waiting_time, wall_time
-    dataframe = pd.DataFrame(columns = ["round", "required_clients", "scheduled_clients", "average_waiting_time", "wall_time", "surplus"])
+    dataframe = pd.DataFrame(columns = ["round", "longest_depart_time", "scheduled_clients", "average_waiting_time", "wall_time", "surplus"])
     # load the vehicle list from all .xml file
     for file in os.listdir(defalut_path):
         if file.endswith(".xml") and file.startswith("Trip"):
@@ -160,7 +160,7 @@ if __name__ == "__main__":
             else:
                 print("The average waiting time is: ", np.mean(waiting_time_list))
             print("The wall time of thie round is: ", peroid)
-            dataframe.loc[round_idx] = [round_idx, REQUIRED_CLIENTS, scheduled_number, np.mean(waiting_time_list), peroid,surplus]
+            dataframe.loc[round_idx] = [round_idx, longesttime, scheduled_number, np.mean(waiting_time_list), peroid,surplus]
             round_idx += 1
     #obtain current time to name the result file
 

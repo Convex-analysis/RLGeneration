@@ -8,7 +8,8 @@ import numpy as np
 import torch.optim as optim
 import pandas as pd
 from time import sleep
-from env import Environment, load_csv
+from env import Environment
+from util.output_parser import load_csv
 
 PREDIFINED_RESOURCE_BLOCK = 20
 MAX_EPISODE_LENGTH = 200
@@ -187,7 +188,7 @@ class simulation():
         self.lr_actor = 0.0003       # learning rate for actor network
         self.lr_critic = 0.001       # learning rate for critic network
         self.random_seed = 0       # set random seed
-        self.max_training_timesteps = 100*self.max_ep_len   # break from training loop if timeteps > max_training_timesteps
+        self.max_training_timesteps = 300*self.max_ep_len   # break from training loop if timeteps > max_training_timesteps
         self.print_freq = self.max_ep_len * 4     # print avg reward in the interval (in num timesteps)
         self.log_freq = self.max_ep_len * 2       # saving avg reward in the interval (in num timesteps)
         self.save_model_freq = self.max_ep_len * 4         # save model frequency (in num timesteps)
@@ -206,8 +207,8 @@ class simulation():
     
     def initialize_environment(self, vehicle_list):
         env=Environment(vehicle_list)
-        # state space dimension, the extendral 3 dimensions here denotes depart time, arrival time and communication time
-        state_dim = PREDIFINED_RESOURCE_BLOCK + 4
+        # state space dimension, the extendral dimensions here denotes depart time, arrival time and communication time, data quality, select times
+        state_dim = PREDIFINED_RESOURCE_BLOCK + 6
         env.set_state_dim(state_dim)
         # action space dimension denotes the probability of selection different time slots
         action_dim = PREDIFINED_RESOURCE_BLOCK
