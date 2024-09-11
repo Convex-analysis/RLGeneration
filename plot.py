@@ -13,6 +13,15 @@ highwithfilter = [781.3,580,20]#average watting time=118
 #from highdensity\highresult.csv
 highDSR_results = [619.88,533,19.993]#no waiting time,surplus=1
 
+
+lowwithoutfilter = [792.34,201,11.3]#average watting time=213.33,surplus=1
+
+lowwithoutfiltersurplus = [993.658,415,23]#average watting time=232,surplus=2
+
+lowwithfilter = [781.3,580,20]#average watting time=118
+
+lowDSR_results = [619.88,533,19.993]#no waiting time,surplus=1
+
 def high_density_time_bar_plot():
     labels = ['Without \n Filter', 'Without Filter \n (Surplus = 2)', 'With Filter', 'DSR']
     x = np.arange(len(labels))

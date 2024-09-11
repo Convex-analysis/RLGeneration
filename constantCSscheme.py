@@ -137,10 +137,11 @@ class ConstantCSscheme:
 if __name__ == "__main__":
     cc = ConstantCSscheme()
     round_idx = 1
-    defalut_path = "./highdensity/"
+    #defalut_path = "./highdensity/"
+    defalut_path = "./lowdensity/"
     dataframe = pd.DataFrame()
     #control the number of surplus vehicles on the without filter function
-    surplus = 2
+    surplus = 1
     # the first row of the dataframe is the column name, which are round, required_clients, scheduled_clients, average_waiting_time, wall_time
     dataframe = pd.DataFrame(columns = ["round", "longest_depart_time", "scheduled_clients", "average_waiting_time", "wall_time", "surplus"])
     # load the vehicle list from all .xml file
