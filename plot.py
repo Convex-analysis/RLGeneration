@@ -13,20 +13,21 @@ highwithfilter = [781.3,580,20]#average watting time=118
 #from highdensity\highresult.csv
 highDSR_results = [619.88,533,19.993]#no waiting time,surplus=1
 
-
-lowwithoutfilter = [792.34,201,11.3]#average watting time=213.33,surplus=1
-
-lowwithoutfiltersurplus = [993.658,415,23]#average watting time=232,surplus=2
-
-lowwithfilter = [781.3,580,20]#average watting time=118
-
-lowDSR_results = [619.88,533,19.993]#no waiting time,surplus=1
+#from constantCSscheme_09-11-14-04.csv
+lowwithoutfilter = [832.4,410,11.6]#average watting time=124.7,surplus=1
+#from  constantCSscheme_09-11-14-23.csv
+lowwithoutfiltersurplus = [998,824,18.8]#average watting time=126.5,surplus=2
+#from  constantCSscheme_09-11-14-26.csv
+lowwithfilter = [906.36,888.78,18.1]#average watting time=42.37
+#from  result.csv
+lowDSR_results = [808.12,702.46,19.1]#no waiting time,surplus=1
 
 def high_density_time_bar_plot():
-    labels = ['Without \n Filter', 'Without Filter \n (Surplus = 2)', 'With Filter', 'DSR']
+    labels = ['Without \n Filter', 'Without Filter \n (Surplus = 2)', 'With Filter', 'MR-VFL \n Scheduler']
     x = np.arange(len(labels))
     width = 0.35
     fig, ax = plt.subplots()
+    ax.axhline(y=1000, color='gray', linestyle='--')
     rects1 = ax.bar(x - width/2, [highwithoutfilter[0], highwithoutfiltersurplus[0], highwithfilter[0], highDSR_results[0]], width, label='Average Round Wall Time')
     rects2 = ax.bar(x + width/2, [highwithoutfilter[1], highwithoutfiltersurplus[1], highwithfilter[1], highDSR_results[1]], width, label='Longest Schedule Vehicle')
     ax.set_ylabel('Time')
@@ -36,13 +37,32 @@ def high_density_time_bar_plot():
     ax.legend()
     plt.show()
 
-def high_density_number_bar_plot():
-    labels = ['Without \n Filter', 'Without Filter \n (Surplus = 2)', 'With Filter', 'DSR']
+def low_density_time_bar_plot():
+    labels = ['Without \n Filter', 'Without Filter \n (Surplus = 2)', 'With Filter', 'MR-VFL \n Scheduler']
     x = np.arange(len(labels))
     width = 0.35
     fig, ax = plt.subplots()
-    rects1 = ax.bar(x - width/2, [highwithoutfilter[2], highwithoutfiltersurplus[2], highwithfilter[2], highDSR_results[2]], width, label='Scheduled Number')
-    ax.set_ylabel('Number')
+    ax.axhline(y=1000, color='gray', linestyle='--')
+    rects1 = ax.bar(x - width/2, [lowwithoutfilter[0], lowwithoutfiltersurplus[0], lowwithfilter[0], lowDSR_results[0]], width, label='Average Round Wall Time')
+    rects2 = ax.bar(x + width/2, [lowwithoutfilter[1], lowwithoutfiltersurplus[1], lowwithfilter[1], lowDSR_results[1]], width, label='Longest Schedule Vehicle')
+    ax.set_ylabel('Time')
+    ax.set_title('Comparison of Different Scheduling Strategies')
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    ax.legend()
+    plt.show()
+
+
+def scheduler_number_bar_plot():
+    labels = ['Without \n Filter', 'Without Filter \n (Surplus = 2)', 'With Filter', 'MR-VFL \n Scheduler']
+    x = np.arange(len(labels))
+    width = 0.35
+    fig, ax = plt.subplots()
+    # add a line at y-axis = 20
+    ax.axhline(y=20, color='gray', linestyle='--')
+    rects1 = ax.bar(x - width/2, [highwithoutfilter[2], highwithoutfiltersurplus[2], highwithfilter[2], highDSR_results[2]], width, label='High Density Scenario')
+    rects2 = ax.bar(x + width/2, [lowwithoutfilter[2], lowwithoutfiltersurplus[2], lowwithfilter[2], lowDSR_results[2]], width, label='Low Density Scenario')
+    ax.set_ylabel('Scheduled Number')
     ax.set_title('Comparison of Different Scheduling Strategies')
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
@@ -67,4 +87,6 @@ if __name__ == "__main__":
     path = "ACER_files/resource_allocation/stability/"
     filename = "ACER_resource_allocation_log_9.csv"
     #plot(path + filename, "episode", "reward")
-    high_density_number_bar_plot()
+    scheduler_number_bar_plot()
+    #high_density_time_bar_plot()
+    #low_density_time_bar_plot()

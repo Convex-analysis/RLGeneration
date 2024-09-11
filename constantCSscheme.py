@@ -141,7 +141,7 @@ if __name__ == "__main__":
     defalut_path = "./lowdensity/"
     dataframe = pd.DataFrame()
     #control the number of surplus vehicles on the without filter function
-    surplus = 1
+    surplus = 2
     # the first row of the dataframe is the column name, which are round, required_clients, scheduled_clients, average_waiting_time, wall_time
     dataframe = pd.DataFrame(columns = ["round", "longest_depart_time", "scheduled_clients", "average_waiting_time", "wall_time", "surplus"])
     # load the vehicle list from all .xml file
@@ -151,7 +151,7 @@ if __name__ == "__main__":
             xml_parser(defalut_path, file)
             file = file.split(".")[0] + ".csv"
             vehicle_list = load_csv(defalut_path + file)
-            longesttime, selected_number = cc.select_vehicle(False, vehicle_list, surplus)
+            longesttime, selected_number = cc.select_vehicle(True, vehicle_list, surplus)
             waiting_time_list, scheduled_number, peroid = cc.calculate_clients_waiting_time()
             print("The longest time is: ", longesttime)
             print("The number of vehicles that can be scheduled is: ", selected_number)
