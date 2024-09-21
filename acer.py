@@ -203,7 +203,7 @@ class simulation():
         
         self.log_f = None
         self.data_f = None
-        
+        self.checkpoint_path = "./ACER_preTrained/resource_allocation"
     
     def initialize_environment(self, vehicle_list):
         env=Environment(vehicle_list)
@@ -217,8 +217,16 @@ class simulation():
         self.env = env
         
     def initialize_ACER_agent(self):
+        model = None
         model = ActorCritic256(self.env.get_state_dim(), self.env.get_action_dim()).to(device)
         optimizer = optim.Adam(model.parameters())
+        saved_model_path = self.checkpoint_path + "/ACER32_resource_allocation_0.pth"
+        if os.path.exists(saved_model_path):
+            checkpoint = torch.load(saved_model_path)
+            model.load_state_dict(checkpoint['model_state_dict'])
+            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            epoch = checkpoint['epoch']
+            loss = checkpoint['loss']
         replay_buffer = EpisodicReplayMemory(self.capacity, self.max_episode_length)
         self.model = model
         self.optimizer = optimizer
@@ -384,8 +392,8 @@ class simulation():
         
             # break; if the episode is over
             if done:
-                current_round_peroid, longest_vehicle_depart, scheduled_number = self.env.statistic_scheduled_vehicles()
                 break
+        current_round_peroid, longest_vehicle_depart, scheduled_number = self.env.statistic_scheduled_vehicles()
         next_state = torch.FloatTensor(state).unsqueeze(0).to(device)
         _, _, retrace = self.model(next_state)
         retrace = retrace.detach()
@@ -534,18 +542,24 @@ if __name__ == "__main__":
         print("Loading file: ", file)
         longest_vehicle_depart_list, round_peroid_list, scheduled_number_list = SM.simulate_process(default_path + file)
         round_count += 1
+        if len(longest_vehicle_depart_list) == 0:
+            continue
         #delete the zero value in the list
         longest_vehicle_depart_list = [x for x in longest_vehicle_depart_list if x != 0]
         round_peroid_list = [x for x in round_peroid_list if x != 0]
         scheduled_number_list = [x for x in scheduled_number_list if x != 0]
         
-        avg_longest_vehicle_depart = sum(longest_vehicle_depart_list) / len(longest_vehicle_depart_list)
+        if len(longest_vehicle_depart_list) != 0:
+            avg_longest_vehicle_depart = sum(longest_vehicle_depart_list) / len(longest_vehicle_depart_list)
+        else:
+            avg_longest_vehicle_depart = 0
         avg_round_peroid = sum(round_peroid_list) / len(round_peroid_list)
         avg_scheduled_number = sum(scheduled_number_list) / len(scheduled_number_list)
         
         log = [round_count, avg_longest_vehicle_depart, avg_round_peroid, avg_scheduled_number]
         #add the log to the dataframe
         df.loc[len(df)] = log
+        print("End of file: Number of Scheduled Vehicles ", len(SM.env.get_scheduled_vehicle()))
     
     df.to_csv("result.csv", index=False)
 
