@@ -533,8 +533,8 @@ if __name__ == "__main__":
     filelist = []
     df = pd.DataFrame(columns = ["round", "longest_vehicle_depart", "round_peroid", "avgscheduled_number", "maxscheduled_number"])
     round_count = 0
-    #default_path = "./lowdensity/"
-    default_path = "./highdensity/"
+    default_path = "./lowdensity/"
+    #default_path = "./highdensity/"
     for file in os.listdir(default_path):
         if file.endswith(".csv") and file.startswith("Trip"):
             filelist.append(file)

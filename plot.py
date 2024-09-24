@@ -27,10 +27,12 @@ lowDSR_results = [808.12,702.46,19.1]#no waiting time,surplus=1
 allhighwithoutfilter = [998.2,841,32.5]#average watting time=211.3
 allhighwithoutfiltersurplus = [998.2,841,32.5]#average watting time=211.3
 allhighwithfilter = [994,934,37.4]#average watting time=136.2
+allhighDSR_results = [929.4,815,42.9]#no waiting time,surplus=1
 
 alllowwithoutfilter = [998.16,824,18.8]#average watting time=126.54
 alllowwithoutfiltersurplus = [998.2,824,18.8]#average watting time=126.54
 alllowwithfilter = [926,914.88,18.8]#average watting time=41.66
+alllowDSR_results = [965.9,799.7,24.8]#no waiting time,surplus=1
 
 def high_density_time_bar_plot():
     labels = ['FedAvg', 'FEDDATE-CS \n (Surplus = 2)', 'AVFL', 'MR-VFL \n Scheduler']
@@ -83,6 +85,23 @@ def scheduler_number_bar_plot():
     ax.legend()
     plt.savefig('scheduler_number_bar_plot.png')
     plt.show()
+
+def greedy_scheduler_number_bar_plot():
+    labels = ['FedAvg', 'FEDDATE-CS \n (Surplus = 2)', 'AVFL', 'MR-VFL \n Scheduler']
+    x = np.arange(len(labels))
+    width = 0.35
+    fig, ax = plt.subplots()
+    # add a line at y-axis = 20
+    #ax.axhline(y=20, color='gray', linestyle='--')
+    rects1 = ax.bar(x - width/2, [allhighwithoutfilter[2], allhighwithoutfiltersurplus[2], allhighwithfilter[2], allhighDSR_results[2]], width, label='High Density Scenario')
+    rects2 = ax.bar(x + width/2, [alllowwithoutfilter[2], alllowwithoutfiltersurplus[2], alllowwithfilter[2], alllowDSR_results[2]], width, label='Low Density Scenario')
+    ax.set_ylabel('Scheduled Number')
+    ax.set_title('Comparison of Different Scheduling Strategies')
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    ax.legend()
+    plt.savefig('greedy_scheduler_number_bar_plot.png')
+    plt.show()
     
 # Plotting function from a csv file to a 2d plot
 def plot(filename,x, y):
@@ -105,3 +124,4 @@ if __name__ == "__main__":
     scheduler_number_bar_plot()
     high_density_time_bar_plot()
     low_density_time_bar_plot()
+    greedy_scheduler_number_bar_plot()
