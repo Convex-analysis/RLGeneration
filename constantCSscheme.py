@@ -11,7 +11,7 @@ from util.output_parser import load_csv, xml_parser
 ONE_ROUND_TIME = 1000
 REQUIRED_EPOCHS = 10
 AVAILABLE_BANDWIDTH = 3
-REQUIRED_CLIENTS = 20
+REQUIRED_CLIENTS = 100
 
 class ConstantCSscheme:
     def __init__(self):

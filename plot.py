@@ -22,8 +22,18 @@ lowwithfilter = [906.36,888.78,18.1]#average watting time=42.37
 #from  result.csv
 lowDSR_results = [808.12,702.46,19.1]#no waiting time,surplus=1
 
+
+#all selected vehicles
+allhighwithoutfilter = [998.2,841,32.5]#average watting time=211.3
+allhighwithoutfiltersurplus = [998.2,841,32.5]#average watting time=211.3
+allhighwithfilter = [994,934,37.4]#average watting time=136.2
+
+alllowwithoutfilter = [998.16,824,18.8]#average watting time=126.54
+alllowwithoutfiltersurplus = [998.2,824,18.8]#average watting time=126.54
+alllowwithfilter = [926,914.88,18.8]#average watting time=41.66
+
 def high_density_time_bar_plot():
-    labels = ['Without \n Filter', 'Without Filter \n (Surplus = 2)', 'With Filter', 'MR-VFL \n Scheduler']
+    labels = ['FedAvg', 'FEDDATE-CS \n (Surplus = 2)', 'AVFL', 'MR-VFL \n Scheduler']
     x = np.arange(len(labels))
     width = 0.35
     fig, ax = plt.subplots()
@@ -35,10 +45,12 @@ def high_density_time_bar_plot():
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
     ax.legend()
+    plt.savefig('high_density_time_bar_plot.png')
     plt.show()
+    
 
 def low_density_time_bar_plot():
-    labels = ['Without \n Filter', 'Without Filter \n (Surplus = 2)', 'With Filter', 'MR-VFL \n Scheduler']
+    labels = ['FedAvg', 'FEDDATE-CS \n (Surplus = 2)', 'AVFL', 'MR-VFL \n Scheduler']
     x = np.arange(len(labels))
     width = 0.35
     fig, ax = plt.subplots()
@@ -50,11 +62,13 @@ def low_density_time_bar_plot():
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
     ax.legend()
+    plt.savefig('low_density_time_bar_plot.png')
     plt.show()
+    
 
 
 def scheduler_number_bar_plot():
-    labels = ['Without \n Filter', 'Without Filter \n (Surplus = 2)', 'With Filter', 'MR-VFL \n Scheduler']
+    labels = ['FedAvg', 'FEDDATE-CS \n (Surplus = 2)', 'AVFL', 'MR-VFL \n Scheduler']
     x = np.arange(len(labels))
     width = 0.35
     fig, ax = plt.subplots()
@@ -67,8 +81,9 @@ def scheduler_number_bar_plot():
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
     ax.legend()
+    plt.savefig('scheduler_number_bar_plot.png')
     plt.show()
-
+    
 # Plotting function from a csv file to a 2d plot
 def plot(filename,x, y):
     #load data from csv file as a dataframe
@@ -88,5 +103,5 @@ if __name__ == "__main__":
     filename = "ACER_resource_allocation_log_9.csv"
     #plot(path + filename, "episode", "reward")
     scheduler_number_bar_plot()
-    #high_density_time_bar_plot()
-    #low_density_time_bar_plot()
+    high_density_time_bar_plot()
+    low_density_time_bar_plot()

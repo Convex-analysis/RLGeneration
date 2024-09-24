@@ -10,7 +10,7 @@ from collections import deque
 ONE_ROUND_TIME = 1000
 REQUIRED_EPOCHS = 10
 AVAILABLE_BANDWIDTH = 3
-REQUIRED_CLIENTS = 50
+REQUIRED_CLIENTS = 100
 
 class Vehicle():
     def __init__(self, id, depart, duration, arrival, train, communication, alpha, selected_times, data_quality):

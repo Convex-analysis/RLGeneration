@@ -531,9 +531,10 @@ class simulation():
 if __name__ == "__main__": 
     SM = simulation()
     filelist = []
-    df = pd.DataFrame(columns = ["round", "longest_vehicle_depart", "round_peroid", "scheduled_number"])
+    df = pd.DataFrame(columns = ["round", "longest_vehicle_depart", "round_peroid", "avgscheduled_number", "maxscheduled_number"])
     round_count = 0
-    default_path = "./lowdensity/"
+    #default_path = "./lowdensity/"
+    default_path = "./highdensity/"
     for file in os.listdir(default_path):
         if file.endswith(".csv") and file.startswith("Trip"):
             filelist.append(file)
@@ -555,12 +556,12 @@ if __name__ == "__main__":
             avg_longest_vehicle_depart = 0
         avg_round_peroid = sum(round_peroid_list) / len(round_peroid_list)
         avg_scheduled_number = sum(scheduled_number_list) / len(scheduled_number_list)
-        
-        log = [round_count, avg_longest_vehicle_depart, avg_round_peroid, avg_scheduled_number]
+        max_scheduled_number = max(scheduled_number_list)
+        log = [round_count, avg_longest_vehicle_depart, avg_round_peroid, avg_scheduled_number,max_scheduled_number]
         #add the log to the dataframe
         df.loc[len(df)] = log
         print("End of file: Number of Scheduled Vehicles ", len(SM.env.get_scheduled_vehicle()))
-    
-    df.to_csv("result.csv", index=False)
+    dname = default_path.split("/")[1] + "_result.csv"
+    df.to_csv(dname, index=False)
 
 
