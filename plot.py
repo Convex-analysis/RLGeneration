@@ -86,6 +86,42 @@ def scheduler_number_bar_plot():
     plt.savefig('scheduler_number_bar_plot.png')
     plt.show()
 
+
+
+def greedy_high_density_time_bar_plot():
+    labels = ['FedAvg', 'FEDDATE-CS \n (Surplus = 2)', 'AVFL', 'MR-VFL \n Scheduler']
+    x = np.arange(len(labels))
+    width = 0.35
+    fig, ax = plt.subplots()
+    ax.axhline(y=1000, color='gray', linestyle='--')
+    rects1 = ax.bar(x - width/2, [allhighwithoutfilter[0], allhighwithoutfiltersurplus[0], allhighwithfilter[0], allhighDSR_results[0]], width, label='Average Round Wall Time')
+    rects2 = ax.bar(x + width/2, [allhighwithoutfilter[1], allhighwithoutfiltersurplus[1], allhighwithfilter[1], allhighDSR_results[1]], width, label='Longest Schedule Vehicle')
+    ax.set_ylabel('Time')
+    ax.set_title('Comparison of Different Scheduling Strategies')
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    ax.legend()
+    plt.savefig('greedy_high_density_time_bar_plot.png')
+    plt.show()
+    
+
+def greedy_low_density_time_bar_plot():
+    labels = ['FedAvg', 'FEDDATE-CS \n (Surplus = 2)', 'AVFL', 'MR-VFL \n Scheduler']
+    x = np.arange(len(labels))
+    width = 0.35
+    fig, ax = plt.subplots()
+    ax.axhline(y=1000, color='gray', linestyle='--')
+    rects1 = ax.bar(x - width/2, [alllowwithoutfilter[0], alllowwithoutfiltersurplus[0], alllowwithfilter[0], alllowDSR_results[0]], width, label='Average Round Wall Time')
+    rects2 = ax.bar(x + width/2, [alllowwithoutfilter[1], alllowwithoutfiltersurplus[1], alllowwithfilter[1], alllowDSR_results[1]], width, label='Longest Schedule Vehicle')
+    ax.set_ylabel('Time')
+    ax.set_title('Comparison of Different Scheduling Strategies')
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    ax.legend()
+    plt.savefig('low_density_time_bar_plot.png')
+    plt.show()
+
+
 def greedy_scheduler_number_bar_plot():
     labels = ['FedAvg', 'FEDDATE-CS \n (Surplus = 2)', 'AVFL', 'MR-VFL \n Scheduler']
     x = np.arange(len(labels))
@@ -125,3 +161,5 @@ if __name__ == "__main__":
     high_density_time_bar_plot()
     low_density_time_bar_plot()
     greedy_scheduler_number_bar_plot()
+    greedy_high_density_time_bar_plot()
+    greedy_low_density_time_bar_plot()
